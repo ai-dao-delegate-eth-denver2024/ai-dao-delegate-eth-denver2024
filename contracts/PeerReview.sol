@@ -40,4 +40,10 @@ contract PeerReview {
         require(msg.sender == owner, "Only the owner can add authors.");
         authors.push(_author);
     }
+
+    // Function to add a reviewer, only callable by the owner
+    function addReviewer(address _reviewer, string[] memory _keywords) public {
+        require(msg.sender == owner, "Only the owner can add reviewers.");
+        reviewers.push(Reviewer(_reviewer, _keywords));
+    }
 }
