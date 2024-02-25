@@ -77,4 +77,11 @@ contract PeerReview {
     }
 
     event SubmissionCreated(uint256 submissionId);
+
+    // Function to get a submission's data by its ID
+    function getSubmission(uint256 submissionId) public view returns (address author, string memory data) {
+        require(submissionId < submissions.length, "Submission does not exist.");
+        Submission storage submission = submissions[submissionId];
+        return (submission.author, submission.data);
+    }
 }
