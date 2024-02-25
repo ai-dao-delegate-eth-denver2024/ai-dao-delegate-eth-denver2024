@@ -25,3 +25,15 @@ contract PeerReviewTest is DSTest {
         assertEq(reviewProcess.authors(0), expectedAuthor1);
         assertEq(reviewProcess.authors(1), expectedAuthor2);
     }
+
+    function testAddReviewer() public {
+        address expectedReviewer1 = 0x90F79bf6EB2c4f870365E785982E1f101E93b906; // Anvil's local test account 3
+        string[] memory keywords1 = new string[](1);
+        keywords1[0] = "gasless";
+
+        reviewProcess.addReviewer(expectedReviewer1, keywords1);
+
+        Reviewer memory addedReviewer = reviewProcess.reviewers(0);
+        assertEq(addedReviewer.addr, expectedReviewer1);
+        assertEq(addedReviewer.keywords[0], "gasless");
+    }
