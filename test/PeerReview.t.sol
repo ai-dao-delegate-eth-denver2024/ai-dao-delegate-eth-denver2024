@@ -61,15 +61,19 @@ contract PeerReviewTest is Test {
         }
     }
 
+    function addKeywordsToSpecificReviewers() internal {
+        peerReview.addKeywordToReviewer(2, "transactions");
+        peerReview.addKeywordToReviewer(3, "fees");
+    }
+
     function testAddKeywordsToReviewers() public {
         setupReviewersAndKeywords();
-        // Adding "transactions" keyword to reviewer 3 and verifying
-        peerReview.addKeywordToReviewer(2, "transactions");
+        addKeywordsToSpecificReviewers();
+        // Verifying "transactions" keyword for reviewer 3
         (, string[] memory reviewer3Keywords) = peerReview.getReviewer(2);
         assertEq(reviewer3Keywords[reviewer3Keywords.length - 1], "transactions");
 
-        // Adding "fees" keyword to reviewer 4 and verifying
-        peerReview.addKeywordToReviewer(3, "fees");
+        // Verifying "fees" keyword for reviewer 4
         (, string[] memory reviewer4Keywords) = peerReview.getReviewer(3);
         assertEq(reviewer4Keywords[reviewer4Keywords.length - 1], "fees");
     }
