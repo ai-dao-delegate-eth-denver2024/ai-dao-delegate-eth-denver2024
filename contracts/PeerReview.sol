@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract ReviewProcess {
+contract PeerReview {
     struct Reviewer {
         address addr;
         string[] keywords;
