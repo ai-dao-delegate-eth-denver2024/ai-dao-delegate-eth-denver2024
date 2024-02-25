@@ -51,4 +51,10 @@ contract PeerReview {
         Reviewer storage reviewer = reviewers[index];
         return (reviewer.addr, reviewer.keywords);
     }
+    // Function to add a keyword to a reviewer
+    function addKeywordToReviewer(uint256 reviewerIndex, string memory keyword) public {
+        require(msg.sender == owner, "Only the owner can add keywords.");
+        require(reviewerIndex < reviewers.length, "Reviewer does not exist.");
+        reviewers[reviewerIndex].keywords.push(keyword);
+    }
 }
