@@ -99,6 +99,11 @@ contract PeerReviewTest is Test {
         peerReview.addKeywordToReviewer(3, "fees");
     }
 
+    // Function to submit data, reusable in other tests
+    function submitData(string memory _data) internal returns (uint256) {
+        return peerReview.submitData(_data);
+    }
+
     function testAddKeywordsToReviewers() public {
         setupReviewersAndKeywords();
         addKeywordsToSpecificReviewers();
@@ -112,5 +117,13 @@ contract PeerReviewTest is Test {
         // Verifying "fees" keyword for reviewer 4
         (, string[] memory reviewer4Keywords) = peerReview.getReviewer(3);
         assertEq(reviewer4Keywords[reviewer4Keywords.length - 1], "fees");
+    }
+
+    // Test for the submitData function
+    function testSubmitData() public {
+        string memory testData = "I'd like to have channels with sponsors in discord to be functioning on the first day of the hackathon";
+        uint256 submissionId = submitData(testData);
+        (, string memory submissionData) = peerReview.submissions(submissionId);
+        assertEq(submissionData, testData);
     }
 }
