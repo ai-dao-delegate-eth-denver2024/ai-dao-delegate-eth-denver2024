@@ -50,10 +50,10 @@ contract PeerReviewTest is DSTest {
 
         for (uint256 i = 0; i < expectedReviewers.length; i++) {
             peerReview.addReviewer(expectedReviewers[i], keywords[i]);
-            Reviewer memory addedReviewer = peerReview.reviewers(i);
-            assertEq(addedReviewer.addr, expectedReviewers[i]);
+            (address reviewerAddr, string[] memory reviewerKeywords) = peerReview.getReviewer(i);
+            assertEq(reviewerAddr, expectedReviewers[i]);
             for (uint256 j = 0; j < keywords[i].length; j++) {
-                assertEq(addedReviewer.keywords[j], keywords[i][j]);
+                assertEq(reviewerKeywords[j], keywords[i][j]);
             }
         }
     }

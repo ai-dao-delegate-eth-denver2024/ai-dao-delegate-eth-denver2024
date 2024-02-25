@@ -46,4 +46,9 @@ contract PeerReview {
         require(msg.sender == owner, "Only the owner can add reviewers.");
         reviewers.push(Reviewer(_reviewer, _keywords));
     }
+    // Function to get a reviewer's information by index
+    function getReviewer(uint256 index) public view returns (address, string[] memory) {
+        Reviewer storage reviewer = reviewers[index];
+        return (reviewer.addr, reviewer.keywords);
+    }
 }
