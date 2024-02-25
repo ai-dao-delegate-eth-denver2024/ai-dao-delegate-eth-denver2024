@@ -59,6 +59,25 @@ contract PeerReviewTest is Test {
     }
 
     function testAddKeywordsToReviewers() public {
+        address[4] memory expectedReviewers = [
+            0x90F79bf6EB2c4f870365E785982E1f101E93b906, // Anvil's local test account 3
+            0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65, // Anvil's local test account 4
+            0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc, // Anvil's local test account 5
+            0x976EA74026E726554dB657fA54763abd0C3a0aa9 // Anvil's local test account 6
+        ];
+        string[][] memory keywords = new string[][](4);
+        keywords[0] = new string[](1);
+        keywords[0][0] = "gasless";
+        keywords[1] = new string[](1);
+        keywords[1][0] = "scalability";
+        keywords[2] = new string[](1);
+        keywords[2][0] = "security";
+        keywords[3] = new string[](1);
+        keywords[3][0] = "usability";
+
+        for (uint256 i = 0; i < expectedReviewers.length; i++) {
+            peerReview.addReviewer(expectedReviewers[i], keywords[i]);
+        }
         // Adding "transactions" keyword to reviewer 3
         peerReview.addKeywordToReviewer(2, "transactions");
         (, string[] memory reviewer3Keywords) = peerReview.getReviewer(2);
