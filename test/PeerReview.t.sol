@@ -124,8 +124,8 @@ contract PeerReviewTest is Test {
     function testSubmitData() public {
         string memory testData = "I'd like to have channels with sponsors in discord to be functioning on the first day of the hackathon";
         uint256 submissionId = submitData();
-        PeerReview.Submission memory submission = peerReview.getSubmission(submissionId);
-        assertEq(submission.data, testData);
+        (address author, string memory data) = peerReview.getSubmission(submissionId);
+        assertEq(data, testData);
     }
 }
 
