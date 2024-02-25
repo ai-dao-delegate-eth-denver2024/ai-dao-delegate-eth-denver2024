@@ -26,14 +26,18 @@ contract PeerReview {
     string public LICENSE;
     uint256 public ROI_DENOMINATOR;
 
+    address public owner;
+
     //constructor that sets license and ROI_DENOMINATOR
     constructor(string memory _license, uint256 _roiDenominator) {
         LICENSE = _license;
         ROI_DENOMINATOR = _roiDenominator;
+        owner = msg.sender;
     }
 
-    // Function to add an author
+    // Function to add an author, only callable by the owner
     function addAuthor(address _author) public {
+        require(msg.sender == owner, "Only the owner can add authors.");
         authors.push(_author);
     }
 }
