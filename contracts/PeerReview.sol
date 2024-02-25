@@ -31,4 +31,9 @@ contract PeerReview {
         LICENSE = _license;
         ROI_DENOMINATOR = _roiDenominator;
     }
+
+    // Function to add an author
+    function addAuthor(address _author) public {
+        authors.push(_author);
+    }
 }
