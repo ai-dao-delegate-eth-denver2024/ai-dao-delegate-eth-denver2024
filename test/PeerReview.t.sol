@@ -57,4 +57,14 @@ contract PeerReviewTest is DSTest {
             }
         }
     }
-}
+    function testAddKeywordsToReviewers() public {
+        // Adding "transactions" keyword to reviewer 3
+        peerReview.addKeywordToReviewer(2, "transactions");
+        (, string[] memory reviewer3Keywords) = peerReview.getReviewer(2);
+        assertEq(reviewer3Keywords[reviewer3Keywords.length - 1], "transactions");
+
+        // Adding "fees" keyword to reviewer 4
+        peerReview.addKeywordToReviewer(3, "fees");
+        (, string[] memory reviewer4Keywords) = peerReview.getReviewer(3);
+        assertEq(reviewer4Keywords[reviewer4Keywords.length - 1], "fees");
+    }
