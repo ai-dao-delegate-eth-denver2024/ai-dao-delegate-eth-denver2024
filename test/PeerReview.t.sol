@@ -17,15 +17,28 @@ contract PeerReviewTest is Test {
         assertEq(peerReview.LICENSE(), expectedLicense);
     }
 
+    function addAuthors() internal {
+        address[2] memory authors = [
+            0x70997970C51812dc3A010C7d01b50e0d17dc79C8, // Anvil's local test account 1
+            0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC  // Anvil's local test account 2
+        ];
+
+        for (uint256 i = 0; i < authors.length; i++) {
+            peerReview.addAuthor(authors[i]);
+        }
+    }
+
     function testAddAuthor() public {
-        address expectedAuthor1 = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8; // Anvil's local test account 1
-        address expectedAuthor2 = 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC; // Anvil's local test account 2
+        addAuthors();
 
-        peerReview.addAuthor(expectedAuthor1);
-        peerReview.addAuthor(expectedAuthor2);
+        address[2] memory expectedAuthors = [
+            0x70997970C51812dc3A010C7d01b50e0d17dc79C8, // Anvil's local test account 1
+            0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC  // Anvil's local test account 2
+        ];
 
-        assertEq(peerReview.authors(0), expectedAuthor1);
-        assertEq(peerReview.authors(1), expectedAuthor2);
+        for (uint256 i = 0; i < expectedAuthors.length; i++) {
+            assertEq(peerReview.authors(i), expectedAuthors[i]);
+        }
     }
 
     function setupReviewersAndKeywords() internal {
