@@ -28,6 +28,12 @@ contract PeerReviewTest is Test {
         assertEq(peerReview.authors(1), expectedAuthor2);
     }
 
+    function addReviewersWithKeywords(address[] memory reviewers, string[][] memory keywords) internal {
+        for (uint256 i = 0; i < reviewers.length; i++) {
+            peerReview.addReviewer(reviewers[i], keywords[i]);
+        }
+    }
+
     function testAddReviewer() public {
         address[4] memory expectedReviewers = [
             0x90F79bf6EB2c4f870365E785982E1f101E93b906, // Anvil's local test account 3
@@ -45,8 +51,9 @@ contract PeerReviewTest is Test {
         keywords[3] = new string[](1);
         keywords[3][0] = "usability";
 
+        addReviewersWithKeywords(expectedReviewers, keywords);
+
         for (uint256 i = 0; i < expectedReviewers.length; i++) {
-            peerReview.addReviewer(expectedReviewers[i], keywords[i]);
             (
                 address reviewerAddr,
                 string[] memory reviewerKeywords
@@ -75,9 +82,8 @@ contract PeerReviewTest is Test {
         keywords[3] = new string[](1);
         keywords[3][0] = "usability";
 
-        for (uint256 i = 0; i < expectedReviewers.length; i++) {
-            peerReview.addReviewer(expectedReviewers[i], keywords[i]);
-        }
+        // Reuse the addReviewersWithKeywords function
+        addReviewersWithKeywords(expectedReviewers, keywords);
         // Adding "transactions" keyword to reviewer 3
         peerReview.addKeywordToReviewer(2, "transactions");
         (, string[] memory reviewer3Keywords) = peerReview.getReviewer(2);
