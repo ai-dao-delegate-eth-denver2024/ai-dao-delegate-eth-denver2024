@@ -2,3 +2,4 @@
 .husky
 .yarn
 node_modules
+.aider*
