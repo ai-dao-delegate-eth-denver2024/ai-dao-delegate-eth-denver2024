@@ -46,15 +46,35 @@ contract PeerReview {
         require(msg.sender == owner, "Only the owner can add reviewers.");
         reviewers.push(Reviewer(_reviewer, _keywords));
     }
+
     // Function to get a reviewer's information by index
-    function getReviewer(uint256 index) public view returns (address, string[] memory) {
+    function getReviewer(uint256 index)
+        public
+        view
+        returns (address, string[] memory)
+    {
         Reviewer storage reviewer = reviewers[index];
         return (reviewer.addr, reviewer.keywords);
     }
+
     // Function to add a keyword to a reviewer
-    function addKeywordToReviewer(uint256 reviewerIndex, string memory keyword) public {
+    function addKeywordToReviewer(uint256 reviewerIndex, string memory keyword)
+        public
+    {
         require(msg.sender == owner, "Only the owner can add keywords.");
         require(reviewerIndex < reviewers.length, "Reviewer does not exist.");
         reviewers[reviewerIndex].keywords.push(keyword);
     }
+
+    // Submit a data object
+    function submitData(string memory _data) public returns (uint256) {
+        Submission storage newSubmission = submissions.push();
+        newSubmission.author = msg.sender;
+        newSubmission.data = _data;
+        uint256 submissionId = submissions.length - 1;
+        emit SubmissionCreated(submissionId);
+        return submissionId;
+    }
+
+    event SubmissionCreated(uint256 submissionId);
 }
