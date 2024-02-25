@@ -84,15 +84,12 @@ contract PeerReviewTest is Test {
 
         // Reuse the addReviewersWithKeywords function
         addReviewersWithKeywords(expectedReviewers, keywords);
-        // Adding "transactions" keyword to reviewer 3
+        // Adding "transactions" keyword to reviewer 3 and verifying
         peerReview.addKeywordToReviewer(2, "transactions");
         (, string[] memory reviewer3Keywords) = peerReview.getReviewer(2);
-        assertEq(
-            reviewer3Keywords[reviewer3Keywords.length - 1],
-            "transactions"
-        );
+        assertEq(reviewer3Keywords[reviewer3Keywords.length - 1], "transactions");
 
-        // Adding "fees" keyword to reviewer 4
+        // Adding "fees" keyword to reviewer 4 and verifying
         peerReview.addKeywordToReviewer(3, "fees");
         (, string[] memory reviewer4Keywords) = peerReview.getReviewer(3);
         assertEq(reviewer4Keywords[reviewer4Keywords.length - 1], "fees");
