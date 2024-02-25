@@ -101,7 +101,8 @@ contract PeerReviewTest is Test {
 
     // Function to submit data, reusable in other tests
     function submitData() internal returns (uint256) {
-        string memory testData = "I'd like to have channels with sponsors in discord to be functioning on the first day of the hackathon";
+        string
+            memory testData = "I'd like to have channels with sponsors in discord to be functioning on the first day of the hackathon";
         return peerReview.submitData(testData);
     }
 
@@ -122,10 +123,10 @@ contract PeerReviewTest is Test {
 
     // Test for the submitData function
     function testSubmitData() public {
-        string memory testData = "I'd like to have channels with sponsors in discord to be functioning on the first day of the hackathon";
+        string
+            memory testData = "I'd like to have channels with sponsors in discord to be functioning on the first day of the hackathon";
         uint256 submissionId = submitData();
-        (address author, string memory data) = peerReview.getSubmission(submissionId);
+        (, string memory data) = peerReview.getSubmission(submissionId);
         assertEq(data, testData);
     }
 }
-
