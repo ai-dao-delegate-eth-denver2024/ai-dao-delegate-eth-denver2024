@@ -72,7 +72,8 @@ contract PeerReview {
         reviewers[reviewerIndex].keywords.push(keyword);
     }
 
-    function addOptions(uint256 submissionIndex, string[] memory options) public {
+    function setOptions(uint256 submissionIndex, string[] memory options) public {
+        require(msg.sender == owner, "Only the owner can set options.");
         submissions[submissionIndex].options = options;
         for (uint8 i = 0; i < options.length; i++) {
             submissions[submissionIndex].tally[i] = FHE.asEuint32(0);
@@ -81,6 +82,7 @@ contract PeerReview {
     }
 
     function setThresholdToPass(uint256 submissionIndex, uint256 threshold) public {
+        require(msg.sender == owner, "Only the owner can set the threshold to pass.");
         submissions[submissionIndex].thresholdToPass = threshold;
     }
 

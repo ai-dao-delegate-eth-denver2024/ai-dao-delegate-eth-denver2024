@@ -10,21 +10,54 @@ export async function deployPeerReviewFixture(): Promise<{ peerReview: PeerRevie
   const admin = signers[0];
 
   const peerReviewFactory = await ethers.getContractFactory("PeerReview");
-
-
   const peerReview = await peerReviewFactory.connect(admin).deploy("Test License", 1000);
+
+  await submitData(peerReview, signers);
+
   const address = await peerReview.getAddress();
   return { peerReview, address };
 }
 
-export async function getTokensFromFaucet() {
+async function addAuthors(peerReview: PeerReview, signers: any) {
+  await peerReview.addAuthor(signers[1]);
+  await peerReview.addAuthor(signers[2]);
+}
+
+async function setupReviewersAndKeywords(peerReview: PeerReview, signers: any) {
+  const keywords = [["gasless"], ["scalability"], ["security"], ["usability"]];
+  for (let i = 3; i < 7; i++) {
+    peerReview.addReviewer(signers[i], keywords[i]);
+  }
+}
+
+async function submitData(peerReview: PeerReview, signers: any) {
+  await getTokensFromFaucet(signers, 1);
+  const transaction = await peerReview.connect(signers[1]).submitData("Are you gonna recommend this project to your friends?")
+  await transaction.wait();
+
+  await peerReview.setOptions(0, ["Very Unlikely", "Unlikely", "Likely", "Very Likely"]);
+  await peerReview.setThresholdToPass(0, 2); //On average at least likely
+
+  await peerReview.findReviewers(0);
+}
+
+async function castVote(peerReview: PeerReview, reviewer: any, option: number) {
+  // await peerReview.connect(reviewer).castVote(0, option); //add FHE instance
+}
+
+export async function getTokensFromFaucetBySignedId(signerId: number = 0) {
   if (hre.network.name === "localfhenix") {
     const signers = await hre.ethers.getSigners();
 
-    if ((await hre.ethers.provider.getBalance(signers[0].address)).toString() === "0") {
+    if ((await hre.ethers.provider.getBalance(signers[signerId].address)).toString() === "0") {
       console.log("Balance for signer is 0 - getting tokens from faucet");
-      await axios.get(`http://localhost:6000/faucet?address=${signers[0].address}`);
-      await waitForBlock(hre);
+      await getTokensFromFaucet(signers, signerId);
     }
   }
 }
+
+export async function getTokensFromFaucet(signers: any, signerId: number = 0) {
+      await axios.get(`http://localhost:6000/faucet?address=${signers[signerId].address}`);
+      await waitForBlock(hre);
+}
+

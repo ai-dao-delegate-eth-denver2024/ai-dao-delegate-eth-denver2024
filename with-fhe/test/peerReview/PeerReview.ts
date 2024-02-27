@@ -5,14 +5,14 @@ import { waitForBlock } from "../../utils/block";
 import { createFheInstance } from "../../utils/instance";
 import type { Signers } from "../types";
 import { shouldBehaveLikePeerReview } from "./PeerReview.behavior";
-import { deployPeerReviewFixture, getTokensFromFaucet } from "./PeerReview.fixture";
+import { deployPeerReviewFixture, getTokensFromFaucetBySignedId } from "./PeerReview.fixture";
 
 describe("Unit tests", function () {
   before(async function () {
     this.signers = {} as Signers;
 
     // get tokens from faucet if we're on localfhenix and don't have a balance
-    await getTokensFromFaucet();
+    await getTokensFromFaucetBySignedId();
 
     // deploy test contract
     const { peerReview, address } = await deployPeerReviewFixture();
