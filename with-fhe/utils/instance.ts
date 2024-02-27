@@ -1,4 +1,4 @@
-import { FhevmInstance, createInstance } from "fhevmjs";
+import { FhevmInstance, createInstance } from "fhenixjs";
 import { EIP712 } from "fhevmjs/lib/sdk/token";
 import { HardhatRuntimeEnvironment } from "hardhat/types/runtime";
 

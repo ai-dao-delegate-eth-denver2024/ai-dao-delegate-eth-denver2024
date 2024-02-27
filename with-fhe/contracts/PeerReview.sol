@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13 <0.9.0;
 
-import "fhevm/lib/TFHE.sol";
+import { FHE, ebool, euint8, euint32, inEuint32 } from "@fhenixprotocol/contracts/FHE.sol";
 
 contract PeerReview {
     struct Reviewer {
@@ -75,8 +75,8 @@ contract PeerReview {
     function addOptions(uint256 submissionIndex, string[] memory options) public {
         submissions[submissionIndex].options = options;
         for (uint8 i = 0; i < options.length; i++) {
-            submissions[submissionIndex].tally[i] = TFHE.asEuint32(0);
-            submissions[submissionIndex].encOptions.push(TFHE.asEuint8(i));
+            submissions[submissionIndex].tally[i] = FHE.asEuint32(0);
+            submissions[submissionIndex].encOptions.push(FHE.asEuint8(i));
         }
     }
 
@@ -227,35 +227,35 @@ contract PeerReview {
     // https://docs.inco.org/getting-started/example-dapps/private-voting
     function castVote(uint256 submissionIndex, bytes memory option) public {
         require(submissions[submissionIndex].isReviewerSelected[msg.sender], "Only selected reviewers can cast votes");
-        euint8 encOption = TFHE.asEuint8(option);
+        euint8 encOption = FHE.asEuint8(option);
 
-        euint8 isValid = TFHE.or(TFHE.eq(encOption, submissions[submissionIndex].encOptions[0]), TFHE.eq(encOption, submissions[submissionIndex].encOptions[1]));
+        ebool isValid = FHE.or(FHE.eq(encOption, submissions[submissionIndex].encOptions[0]), FHE.eq(encOption, submissions[submissionIndex].encOptions[1]));
         for (uint i = 1; i < submissions[submissionIndex].encOptions.length; i++) {
-            TFHE.or(isValid, TFHE.eq(encOption, submissions[submissionIndex].encOptions[i + 1]));
+            FHE.or(isValid, FHE.eq(encOption, submissions[submissionIndex].encOptions[i + 1]));
         }
-        TFHE.req(isValid);
+        FHE.req(isValid);
 
         // If already voted - first revert the old vote
-        if (TFHE.isInitialized(submissions[submissionIndex].votes[msg.sender])) {
-            addToTally(submissionIndex, submissions[submissionIndex].votes[msg.sender], TFHE.asEuint32(MAX_INT)); // Adding MAX_INT is effectively `.sub(1)`
+        if (FHE.isInitialized(submissions[submissionIndex].votes[msg.sender])) {
+            addToTally(submissionIndex, submissions[submissionIndex].votes[msg.sender], FHE.asEuint32(MAX_INT)); // Adding MAX_INT is effectively `.sub(1)`
         }
 
         submissions[submissionIndex].votes[msg.sender] = encOption;
-        addToTally(submissionIndex, encOption, TFHE.asEuint32(1));
+        addToTally(submissionIndex, encOption, FHE.asEuint32(1));
 
     }
 
     function addToTally(uint256 submissionIndex, euint8 encOption, euint32 amount) internal {
         for (uint8 i = 0; i < submissions[submissionIndex].encOptions.length; i++) {
-            euint32 toAdd = TFHE.cmux(TFHE.asEuint32(TFHE.eq(encOption, submissions[submissionIndex].encOptions[i])), amount, TFHE.asEuint32(0));
-            submissions[submissionIndex].tally[i] = TFHE.add(submissions[submissionIndex].tally[i], toAdd);
+            euint32 toAdd = FHE.select(FHE.eq(encOption, submissions[submissionIndex].encOptions[i]), amount, FHE.asEuint32(0));
+            submissions[submissionIndex].tally[i] = FHE.add(submissions[submissionIndex].tally[i], toAdd);
         }
     }
 
-    function revealResult(uint256 submissionIndex, bytes32 publicKey) public {
+    function revealResult(uint256 submissionIndex) public {
         uint256 overallResult = 0;
         for (uint8 i = 0; i < submissions[submissionIndex].encOptions.length; i++) {
-            uint256 optionTally = 1; //TFHE.decrypt(submissions[submissionIndex].tally[i]);
+            uint256 optionTally = FHE.decrypt(submissions[submissionIndex].tally[i]);
             overallResult += optionTally * i;
         }
         //approve the submission

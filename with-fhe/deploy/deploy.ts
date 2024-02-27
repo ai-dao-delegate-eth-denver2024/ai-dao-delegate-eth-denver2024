@@ -14,14 +14,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   console.log(`FHVoting contract: `, voting.address);
 
-  const counter = await deploy("Counter", {
+  const peerReview = await deploy("PeerReview", {
     from: deployer,
     args: [],
     log: true,
     skipIfAlreadyDeployed: false,
   });
 
-  console.log(`Counter contract: `, counter.address);
+  console.log(`PeerReview contract: `, peerReview.address);
 };
 
 export default func;

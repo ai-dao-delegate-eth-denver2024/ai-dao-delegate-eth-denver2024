@@ -150,12 +150,12 @@ $ pnpm deploy:contracts"
 
 ### Tasks
 
-#### Deploy Counter
+#### Deploy PeerReview
 
-Deploy a new instance of the Counter contract via a task:
+Deploy a new instance of the PeerReview contract via a task:
 
 ```sh
-$ pnpm task:deployCounter --network localfhenix
+$ pnpm task:deployPeerReview --network localfhenix
 ```
 
 #### Add count

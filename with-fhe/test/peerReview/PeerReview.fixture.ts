@@ -2,18 +2,19 @@ import axios from "axios";
 import { ethers } from "hardhat";
 import hre from "hardhat";
 
-import type { Counter } from "../../types/Counter";
+import type { PeerReview } from "../../types";
 import { waitForBlock } from "../../utils/block";
 
-export async function deployCounterFixture(): Promise<{ counter: Counter; address: string }> {
+export async function deployPeerReviewFixture(): Promise<{ peerReview: PeerReview; address: string }> {
   const signers = await ethers.getSigners();
   const admin = signers[0];
 
-  const counterFactory = await ethers.getContractFactory("Counter");
-  const counter = await counterFactory.connect(admin).deploy();
-  // await greeter.waitForDeployment();
-  const address = await counter.getAddress();
-  return { counter, address };
+  const peerReviewFactory = await ethers.getContractFactory("PeerReview");
+
+
+  const peerReview = await peerReviewFactory.connect(admin).deploy("Test License", 1000);
+  const address = await peerReview.getAddress();
+  return { peerReview, address };
 }
 
 export async function getTokensFromFaucet() {

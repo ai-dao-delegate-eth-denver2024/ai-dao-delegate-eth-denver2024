@@ -1,12 +1,11 @@
-
 import { ethers } from "hardhat";
 import hre from "hardhat";
 
-import { waitForBlock } from "../utils/block";
-import { createFheInstance } from "../utils/instance";
-import type { Signers } from "./types";
-import { shouldBehaveLikeCounter } from "./Counter.behavior";
-import { deployCounterFixture, getTokensFromFaucet } from "./Counter.fixture";
+import { waitForBlock } from "../../utils/block";
+import { createFheInstance } from "../../utils/instance";
+import type { Signers } from "../types";
+import { shouldBehaveLikePeerReview } from "./PeerReview.behavior";
+import { deployPeerReviewFixture, getTokensFromFaucet } from "./PeerReview.fixture";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -16,10 +15,9 @@ describe("Unit tests", function () {
     await getTokensFromFaucet();
 
     // deploy test contract
-    const { counter, address } = await deployCounterFixture();
-    this.counter = counter;
+    const { peerReview, address } = await deployPeerReviewFixture();
+    this.peerReview = peerReview;
 
-    // initiate fhevmjs
     this.instance = await createFheInstance(hre, address);
 
     // set admin account/signer
@@ -30,7 +28,7 @@ describe("Unit tests", function () {
     await waitForBlock(hre);
   });
 
-  describe("Counter", function () {
-    shouldBehaveLikeCounter();
+  describe("PeerReview", function () {
+    shouldBehaveLikePeerReview();
   });
 });
