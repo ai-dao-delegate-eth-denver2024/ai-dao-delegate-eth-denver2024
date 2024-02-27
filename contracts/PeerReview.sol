@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "fhevm/lib/TFHE.sol";
+
 contract PeerReview {
     struct Reviewer {
         address addr;
@@ -10,9 +12,13 @@ contract PeerReview {
     struct Submission {
         address author;
         string data;
+        string[] options;
+        uint256 thresholdToPass;
         mapping(address => bytes32) commits;
-        mapping(address => bool) votes;
-        mapping(address => bool) comments;
+        mapping(address => euint8) votes;
+        mapping(uint8 => euint32) tally;
+        mapping(address => string) comments;
+        mapping(address => bool) isReviewerSelected;
         address[] selectedReviewers;
         address[] shuffledReviewers; // Updated field to store shuffled reviewers
         bool isApproved;
@@ -63,6 +69,14 @@ contract PeerReview {
         require(msg.sender == owner, "Only the owner can add keywords.");
         require(reviewerIndex < reviewers.length, "Reviewer does not exist.");
         reviewers[reviewerIndex].keywords.push(keyword);
+    }
+
+    function addOptions(uint256 submissionIndex, string[] memory options) {
+        submissions[submissionIndex].options = options;
+    }
+
+    function setThresholdToPass(uint256 submissionIndex, uint256 threshold) {
+        submissions[submissionIndex].thresholdToPass = thresholdToPass;
     }
 
     // Submit a data object
@@ -143,7 +157,9 @@ contract PeerReview {
                 topReviewers[2] = reviewerAddr;
             }
         }
-
+        for (uint256 i = 0; i < submission.selectedReviewers; i++) {
+            submission.isReviewerSelected[submission.selectedReviewers[i]] = true;
+        }
         submission.selectedReviewers = topReviewers;
     }
 
@@ -204,10 +220,40 @@ contract PeerReview {
     }
 
     // https://docs.inco.org/getting-started/example-dapps/private-voting
-    function castVote(bytes calldata encryptedVoteCount) public {}
+    function castVote(uint256 submissionIndex, bytes memory option) public {
+        require(submissions[submissionIndex].isReviewerSelected[msg.caller], "Only selected reviewers can cast votes")
+        euint8 encOption = TFHE.asEuint8(option);
 
-    function revealResult() public {
+        euint8 isValid = TFHE.or(TFHE.eq(encOption, encOptions[0]), TFHE.eq(encOption, encOptions[1]));
+        for (uint i = 1; i < encOptions.length; i++) {
+            TFHE.or(isValid, TFHE.eq(encOption, encOptions[i + 1]));
+        }
+        TFHE.req(isValid);
+
+        // If already voted - first revert the old vote
+        if (TFHE.isInitialized(submissions[submissionIndex].votes[msg.sender])) {
+            addToTally(submissionIndex, submissions[submissionIndex].votes[msg.sender], TFHE.asEuint32(MAX_INT)); // Adding MAX_INT is effectively `.sub(1)`
+        }
+
+        submissions[submissionIndex].votes[msg.sender] = option;
+        addToTally(submissionIndex, option, TFHE.asEuint32(1));
+
+    }
+
+    function addToTally(uint256 submissionIndex, euint8 encOption, euint32 amount) internal {
+        for (uint8 i = 0; i < submissions[submissionIndex].encOptions.length; i++) {
+            euint32 toAdd = TFHE.cmux(TFHE.asEuint32(TFHE.eq(option, submissions[submissionIndex].encOptions[i])), amount, TFHE.asEuint32(0));
+            tally[i] = TFHE.add(tally[i], toAdd);
+        }
+    }
+
+    function revealResult(uint256 submissionIndex, bytes32 publicKey) public {
+        uint256 overallResult = 0;
+        for (uint8 i = 0; i < submission[submissionIndex].encOptions.length; i++) {
+            uint256 optionTally = TFHE.decrypt(submission[submissionIndex].tally[i]);
+            overallResult += optionTally * i;
+        }
         //approve the submission
-        submissions[0].isApproved = true;
+        submissions[submissionIndex].isApproved = submission[submissionIndex].selectedReviewers.length * submission[submissionIndex].thresholdToPass <= overallResult;
     }
 }
