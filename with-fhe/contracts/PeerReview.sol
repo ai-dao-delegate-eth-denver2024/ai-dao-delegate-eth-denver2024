@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.13 <0.9.0;
 
-import { FHE, ebool, euint8, euint32, inEuint32 } from "@fhenixprotocol/contracts/FHE.sol";
+import { FHE, ebool, euint8, euint32, inEuint8 } from "@fhenixprotocol/contracts/FHE.sol";
 
 contract PeerReview {
     struct Reviewer {
@@ -227,7 +227,7 @@ contract PeerReview {
     }
 
     // https://docs.inco.org/getting-started/example-dapps/private-voting
-    function castVote(uint256 submissionIndex, bytes memory option) public {
+    function castVote(uint256 submissionIndex, inEuint8 memory option) public {
         require(submissions[submissionIndex].isReviewerSelected[msg.sender], "Only selected reviewers can cast votes");
         euint8 encOption = FHE.asEuint8(option);
 
@@ -254,6 +254,8 @@ contract PeerReview {
         }
     }
 
+    event ResultRevealed(uint256 submissionId, bool result);
+
     function revealResult(uint256 submissionIndex) public {
         uint256 overallResult = 0;
         for (uint8 i = 0; i < submissions[submissionIndex].encOptions.length; i++) {
@@ -262,5 +264,6 @@ contract PeerReview {
         }
         //approve the submission
         submissions[submissionIndex].isApproved = submissions[submissionIndex].selectedReviewers.length * submissions[submissionIndex].thresholdToPass <= overallResult;
+        emit ResultRevealed(submissionIndex, submissions[submissionIndex].isApproved);
     }
 }

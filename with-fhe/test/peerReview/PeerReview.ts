@@ -5,7 +5,7 @@ import { waitForBlock } from "../../utils/block";
 import { createFheInstance } from "../../utils/instance";
 import type { Signers } from "../types";
 import { shouldBehaveLikePeerReview } from "./PeerReview.behavior";
-import { deployPeerReviewFixture, getTokensFromFaucetBySignedId } from "./PeerReview.fixture";
+import { addAuthors, castVote, deployPeerReviewFixture, getTokensFromFaucet, getTokensFromFaucetBySignedId, setupReviewersAndKeywords, submitData } from "./PeerReview.fixture";
 
 describe("Unit tests", function () {
   before(async function () {
@@ -16,13 +16,20 @@ describe("Unit tests", function () {
 
     // deploy test contract
     const { peerReview, address } = await deployPeerReviewFixture();
+    
     this.peerReview = peerReview;
-
     this.instance = await createFheInstance(hre, address);
 
     // set admin account/signer
     const signers = await ethers.getSigners();
     this.signers.admin = signers[0];
+
+    await getTokensFromFaucet(signers, 0);
+    await addAuthors(peerReview, signers);
+    await setupReviewersAndKeywords(peerReview, signers);
+
+    await getTokensFromFaucet(signers, 0);
+    await submitData(peerReview, signers);
 
     // wait for deployment block to finish
     await waitForBlock(hre);

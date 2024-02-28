@@ -12,37 +12,38 @@ export async function deployPeerReviewFixture(): Promise<{ peerReview: PeerRevie
   const peerReviewFactory = await ethers.getContractFactory("PeerReview");
   const peerReview = await peerReviewFactory.connect(admin).deploy("Test License", 1000);
 
-  await submitData(peerReview, signers);
-
   const address = await peerReview.getAddress();
   return { peerReview, address };
 }
 
-async function addAuthors(peerReview: PeerReview, signers: any) {
+export async function addAuthors(peerReview: PeerReview, signers: any) {
   await peerReview.addAuthor(signers[1]);
   await peerReview.addAuthor(signers[2]);
 }
 
-async function setupReviewersAndKeywords(peerReview: PeerReview, signers: any) {
+export async function setupReviewersAndKeywords(peerReview: PeerReview, signers: any) {
   const keywords = [["gasless"], ["scalability"], ["security"], ["usability"]];
   for (let i = 3; i < 7; i++) {
     peerReview.addReviewer(signers[i], keywords[i]);
   }
 }
 
-async function submitData(peerReview: PeerReview, signers: any) {
+export async function submitData(peerReview: PeerReview, signers: any) {
   await getTokensFromFaucet(signers, 1);
   const transaction = await peerReview.connect(signers[1]).submitData("Are you gonna recommend this project to your friends?")
   await transaction.wait();
 
-  await peerReview.setOptions(0, ["Very Unlikely", "Unlikely", "Likely", "Very Likely"]);
+  const options = ["Very Unlikely", "Unlikely", "Likely", "Very Likely"]
+  await peerReview.setOptions(0, options);
   await peerReview.setThresholdToPass(0, 2); //On average at least likely
 
   await peerReview.findReviewers(0);
 }
 
-async function castVote(peerReview: PeerReview, reviewer: any, option: number) {
-  // await peerReview.connect(reviewer).castVote(0, option); //add FHE instance
+export async function castVote(peerReview: PeerReview, reviewer: any, option: number) {
+  const encOption = this.instance.instance.encrypt32(option);
+  const transaction = await peerReview.connect(reviewer).castVote(0, encOption); //add FHE instance
+  await transaction.wait();
 }
 
 export async function getTokensFromFaucetBySignedId(signerId: number = 0) {
