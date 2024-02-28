@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
-import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol";
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 
 contract PeerReview is VRFConsumerBaseV2 {
     VRFCoordinatorV2Interface immutable VRF_COORDINATOR;
@@ -39,13 +39,13 @@ contract PeerReview is VRFConsumerBaseV2 {
     address public owner;
 
     //constructor that sets license and ROI_DENOMINATOR
-    constructor(string memory _license, uint256 _roiDenominator, uint64 vrfSubscriptionId, address vrfCoordinator, bytes32 vrfKeyHash) VRFConsumerBaseV2(vrfCoordinator) {
+    constructor(string memory _license, uint256 _roiDenominator, uint64 _vrfSubscriptionId, address _vrfCoordinator, bytes32 _vrfKeyHash) VRFConsumerBaseV2(_vrfCoordinator) {
         LICENSE = _license;
         ROI_DENOMINATOR = _roiDenominator;
         owner = msg.sender;
-        VRF_COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
-        vrfKeyHash = vrfKeyHash;
-        vrfSubscriptionId = vrfSubscriptionId;
+        VRF_COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
+        vrfKeyHash = _vrfKeyHash;
+        vrfSubscriptionId = _vrfSubscriptionId;
     }
 
     // Function to add an author, only callable by the owner
@@ -115,12 +115,12 @@ contract PeerReview is VRFConsumerBaseV2 {
             CALLBACK_GAS_LIMIT,
             NUM_WORDS
         );
-        vrfRequestIdToSubmissionId[requestId] = submissionId;
+        vrfRequestIdToSubmissionId[vrfRequestId] = submissionId;
     }
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
         uint256 submissionId = vrfRequestIdToSubmissionId[requestId];
-        submission[submissionId].seed = randomWords[0]; 
+        submissions[submissionId].seed = randomWords[0]; 
     }
 
     // Find top 3 matching reviewers for a submission
