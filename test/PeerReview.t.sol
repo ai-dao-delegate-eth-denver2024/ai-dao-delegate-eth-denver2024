@@ -10,7 +10,7 @@ contract PeerReviewTest is Test {
     uint256 expectedRoiDenominator = 1000;
 
     function setUp() public {
-        peerReview = new PeerReview(expectedLicense, expectedRoiDenominator);
+        peerReview = new PeerReview(expectedLicense, expectedRoiDenominator, 0x0, 0x0);
     }
 
     function testInitialLicenseSetting() public {
