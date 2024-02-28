@@ -1,7 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract PeerReview {
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+
+contract PeerReview is VRFConsumerBaseV2 {
+    VRFCoordinatorV2Interface immutable VRF_COORDINATOR;
+    uint64 immutable vrfSubscriptionId;
+    bytes32 immutable vrfKeyHash;    
+    uint32 constant CALLBACK_GAS_LIMIT = 100000;    
+    uint16 constant REQUEST_CONFIRMATIONS = 3;
+    uint32 constant NUM_WORDS = 1;
+    mapping(uint256 => uint256) vrfRequestIdToSubmissionId;
+
     struct Reviewer {
         address addr;
         string[] keywords;
@@ -28,10 +39,13 @@ contract PeerReview {
     address public owner;
 
     //constructor that sets license and ROI_DENOMINATOR
-    constructor(string memory _license, uint256 _roiDenominator) {
+    constructor(string memory _license, uint256 _roiDenominator, uint64 vrfSubscriptionId, address vrfCoordinator, bytes32 vrfKeyHash) VRFConsumerBaseV2(vrfCoordinator) {
         LICENSE = _license;
         ROI_DENOMINATOR = _roiDenominator;
         owner = msg.sender;
+        VRF_COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
+        vrfKeyHash = vrfKeyHash;
+        vrfSubscriptionId = vrfSubscriptionId;
     }
 
     // Function to add an author, only callable by the owner
@@ -92,9 +106,21 @@ contract PeerReview {
     }
 
     // Function to assign a seed to a submission
-    function assignRndSeed(uint256 submissionId) public {
+    function assignRndSeed(uint256 submissionId) external  {
         require(submissionId < submissions.length, "Invalid submission ID");
-        submissions[submissionId].seed = 0;
+        uint256 vrfRequestId = VRF_COORDINATOR.requestRandomWords(
+            vrfKeyHash,
+            vrfSubscriptionId,
+            REQUEST_CONFIRMATIONS,
+            CALLBACK_GAS_LIMIT,
+            NUM_WORDS
+        );
+        vrfRequestIdToSubmissionId[requestId] = submissionId;
+    }
+
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+        uint256 submissionId = vrfRequestIdToSubmissionId[requestId];
+        submission[submissionId].seed = randomWords[0]; 
     }
 
     // Find top 3 matching reviewers for a submission
